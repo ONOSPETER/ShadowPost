@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "ShadowPost"
+version = "1.0.0"
+id = "artifacts/shadowpost"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19559
+
+[services.development]
+run = "pnpm --filter @workspace/shadowpost run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/shadowpost", "run", "build" ]
+publicDir = "artifacts/shadowpost/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19559"
+BASE_PATH = "/"

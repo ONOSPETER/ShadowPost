@@ -1,0 +1,163 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --font-sans: var(--app-font-sans);
+  --font-mono: var(--app-font-mono);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  /* Sui Dark Navy — near-black base */
+  --background: 216 60% 5%;       /* #020D1A */
+  --foreground: 213 31% 91%;      /* #E2EBF5 */
+
+  --card: 216 55% 8%;             /* #071220 */
+  --card-foreground: 213 31% 88%;
+
+  --popover: 216 55% 8%;
+  --popover-foreground: 213 31% 88%;
+
+  --primary: 214 100% 59%;        /* Sui blue #3B82F6 */
+  --primary-foreground: 216 60% 5%;
+
+  --secondary: 216 48% 11%;       /* #0E1E32 */
+  --secondary-foreground: 213 25% 70%;
+
+  --muted: 216 40% 10%;
+  --muted-foreground: 215 20% 42%;
+
+  --accent: 214 90% 55%;
+  --accent-foreground: 216 60% 5%;
+
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 98%;
+
+  --border: 216 40% 14%;          /* #111D2E */
+  --input: 216 40% 14%;
+  --ring: 214 100% 59%;
+
+  --app-font-sans: 'Inter', system-ui, sans-serif;
+  --app-font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --radius: 0.625rem;
+
+  /* Sui palette custom props */
+  --sui-bg: #020C1B;
+  --sui-surface: #071628;
+  --sui-card: #0A1E36;
+  --sui-elevated: #0E2444;
+  --sui-border: #162E4D;
+  --sui-blue: #3B82F6;
+  --sui-blue-bright: #60A5FA;
+  --sui-blue-dim: #1D4ED8;
+  --sui-blue-muted: rgba(59,130,246,0.12);
+  --sui-blue-glow: rgba(59,130,246,0.2);
+  --sui-text: #C8D9EF;
+  --sui-text-dim: #6B8BAE;
+  --sui-text-muted: #334F6B;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  html {
+    background: var(--sui-bg);
+  }
+
+  body {
+    background: var(--sui-bg);
+    color: var(--sui-text);
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+  }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--sui-border);
+    border-radius: 2px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--sui-blue-dim);
+  }
+}
+
+@layer utilities {
+  .sui-surface {
+    background: var(--sui-surface);
+    border: 1px solid var(--sui-border);
+  }
+  .sui-card {
+    background: var(--sui-card);
+    border: 1px solid var(--sui-border);
+  }
+  .sui-elevated {
+    background: var(--sui-elevated);
+    border: 1px solid rgba(22, 46, 77, 0.8);
+  }
+  .sui-glow {
+    box-shadow: 0 0 24px var(--sui-blue-glow), 0 0 48px rgba(59,130,246,0.06);
+  }
+  .sui-btn {
+    background: var(--sui-blue);
+    color: white;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    transition: all 0.15s ease;
+  }
+  .sui-btn:hover {
+    background: var(--sui-blue-bright);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px var(--sui-blue-glow);
+  }
+  .sui-btn:active { transform: translateY(0); }
+
+  .gradient-mesh {
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59,130,246,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(29,78,216,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 10% 60%, rgba(37,99,235,0.06) 0%, transparent 50%),
+      var(--sui-bg);
+  }
+
+  .grid-pattern {
+    background-image:
+      linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .text-sui { color: var(--sui-blue); }
+  .text-sui-bright { color: var(--sui-blue-bright); }
+  .text-sui-dim { color: var(--sui-text-dim); }
+  .text-sui-muted { color: var(--sui-text-muted); }
+  .bg-sui-blue { background: var(--sui-blue); }
+  .border-sui { border-color: var(--sui-border); }
+  .border-sui-blue { border-color: var(--sui-blue); }
+}
