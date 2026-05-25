@@ -6,8 +6,13 @@ import { fetchBlob } from "@/lib/walrus";
 import { decryptSecret } from "@/lib/crypto";
 import { truncateAddress, formatTimestamp } from "@/lib/utils";
 
+interface DecryptedPayload {
+  text?: string;
+  files?: Array<{ name: string; size: number; type: string; data: string }>;
+}
+
 interface DecryptedMessage extends MailboxMessage {
-  decrypted?: string;
+  decrypted?: DecryptedPayload;
   decrypting?: boolean;
   error?: string;
 }
@@ -94,9 +99,42 @@ function MessageDetail({ msg, onDecrypt }: { msg: DecryptedMessage; onDecrypt: (
                 <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
                 <span className="text-[11px] font-medium uppercase tracking-wider text-green-400">Decrypted</span>
               </div>
-              <div className="rounded-xl p-5 text-sm leading-relaxed font-mono whitespace-pre-wrap" style={{ background: "var(--sui-elevated)", border: "1px solid var(--sui-border)", color: "var(--sui-text)" }}>
-                {msg.decrypted}
-              </div>
+
+              {msg.decrypted.text && (
+                <div className="rounded-xl p-5 text-sm leading-relaxed whitespace-pre-wrap mb-3" style={{ background: "var(--sui-elevated)", border: "1px solid var(--sui-border)", color: "var(--sui-text)" }}>
+                  {msg.decrypted.text}
+                </div>
+              )}
+
+              {msg.decrypted.files && msg.decrypted.files.length > 0 && (
+                <div className="space-y-2">
+                  <div className="text-[11px] font-medium uppercase tracking-wider mb-2" style={{ color: "var(--sui-text-muted)" }}>
+                    Attachments ({msg.decrypted.files.length})
+                  </div>
+                  {msg.decrypted.files.map((f, i) => (
+                    <a
+                      key={i}
+                      href={f.data}
+                      download={f.name}
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors"
+                      style={{ background: "var(--sui-elevated)", border: "1px solid var(--sui-border)" }}
+                    >
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold shrink-0" style={{ background: "rgba(59,130,246,0.15)", color: "#93C5FD" }}>
+                        {f.name.split(".").pop()?.toUpperCase().slice(0, 4) || "FILE"}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-medium text-white truncate">{f.name}</div>
+                        <div className="text-[11px]" style={{ color: "var(--sui-text-muted)" }}>
+                          {(f.size / 1024).toFixed(0)} KB · {f.type || "unknown type"}
+                        </div>
+                      </div>
+                      <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 shrink-0" style={{ color: "var(--sui-text-muted)" }}>
+                        <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </a>
+                  ))}
+                </div>
+              )}
             </motion.div>
           )}
 
@@ -150,7 +188,13 @@ export default function InboxPage() {
       const { encryptedMessage, nonce, ephemeralPublicKey } = raw as { encryptedMessage: string; nonce: string; ephemeralPublicKey: string };
       if (!secretKey) throw new Error("No secret key");
       const plaintext = decryptSecret(encryptedMessage, nonce, ephemeralPublicKey, secretKey);
-      setMessages((p) => p.map((m) => m.id === msg.id ? { ...m, decrypted: plaintext, decrypting: false } : m));
+      let payload: DecryptedPayload;
+      try {
+        payload = JSON.parse(plaintext) as DecryptedPayload;
+      } catch {
+        payload = { text: plaintext };
+      }
+      setMessages((p) => p.map((m) => m.id === msg.id ? { ...m, decrypted: payload, decrypting: false } : m));
     } catch (e: unknown) {
       const err = e instanceof Error ? e.message : "Decryption failed";
       setMessages((p) => p.map((m) => m.id === msg.id ? { ...m, error: err, decrypting: false } : m));
@@ -233,7 +277,11 @@ export default function InboxPage() {
                         {msg.decrypted && <span className="w-1.5 h-1.5 rounded-full bg-green-400 shrink-0 ml-1" />}
                       </div>
                       <div className="text-[11px] truncate mb-1" style={{ color: "var(--sui-text-dim)" }}>
-                        {msg.decrypted ? msg.decrypted.slice(0, 40) + (msg.decrypted.length > 40 ? "…" : "") : "Encrypted message"}
+                        {msg.decrypted
+                          ? (msg.decrypted.text
+                              ? msg.decrypted.text.slice(0, 40) + (msg.decrypted.text.length > 40 ? "…" : "")
+                              : `${msg.decrypted.files?.length ?? 0} attachment(s)`)
+                          : "Encrypted message"}
                       </div>
                       <div className="text-[10px]" style={{ color: "var(--sui-text-muted)" }}>
                         {formatTimestamp(msg.createdAt)}

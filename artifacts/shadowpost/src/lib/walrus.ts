@@ -53,10 +53,16 @@ export async function uploadToWalrus(data: unknown): Promise<WalrusUploadResult>
 }
 
 export async function fetchBlob(blobId: string): Promise<Record<string, unknown>> {
-  const res = await fetch(`${AGGREGATOR}/v1/blobs/${blobId}`);
+  const res = await fetch(`/api/walrus/blob/${encodeURIComponent(blobId)}`);
 
   if (!res.ok) {
-    throw new Error(`Walrus fetch failed (${res.status}): ${res.statusText}`);
+    const text = await res.text().catch(() => res.statusText);
+    let detail = text;
+    try {
+      const json = JSON.parse(text) as { error?: string; detail?: string };
+      detail = json.error || json.detail || text;
+    } catch { /* keep raw */ }
+    throw new Error(`Failed to fetch blob (${res.status}): ${detail}`);
   }
 
   return res.json();
